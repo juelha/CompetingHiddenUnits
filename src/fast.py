@@ -12,7 +12,7 @@ def training(inputs, n_hidden):
     eps0=2e-2    # learning rate
     mu=0.0       # the mean of the gaussian distribution that initializes the weights
     sigma=1.0    # the standard deviation of that gaussian
-    n_epochs=200      # number of epochs
+    n_epochs=100      # number of epochs
     size_batch=100      # size of the minibatch
     prec=1e-30   # parameter that controls numerical precision of the weight updates
     delta=0.4    # Strength of the anti-hebbian learning

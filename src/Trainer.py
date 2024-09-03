@@ -131,10 +131,10 @@ class Trainer():
         accuracy =  y_batch == np.round(prediction, 0)
 
         # return averages per batch
-        test_loss = np.mean(loss)
+        #test_loss = np.mean(loss)
         test_accuracy =  np.mean(accuracy)
 
-        self.test_losses.append(test_loss)
+        self.test_losses.append(loss)
         self.test_accuracies.append(test_accuracy)
        # return test_loss, test_accuracy
 
@@ -171,7 +171,7 @@ class Trainer():
         self.weights -= self.learning_rate * gradients
 
         # return average loss
-        loss = np.mean(losses_aggregator)
+        #loss = np.mean(losses_aggregator) 
         acc_mean = np.mean(accuracy_aggregator)
         self.train_accuracies.append(acc_mean)
         self.train_losses.append(loss)
@@ -188,7 +188,7 @@ class Trainer():
         df = f * (1 - f)
         return df
 
-    def error_function(self, prediction, targets):
+    def error_function(self, prediction, targets, m=2):
         """Derived error function:  
             error function: tf.reduce_mean(0.5*(prediction - targets)**2)
         
@@ -199,11 +199,23 @@ class Trainer():
             error_term (float): output of derived error function
         """
 
-        error_term = 0.5*(prediction - targets)**2
-        return error_term
+        error_term = (prediction - targets)**m
+        print("\nprediction", prediction)
+        
+        print("\nt", targets.shape)
+        print("\ne", error_term.shape)
+        
+        
+        print("\n\nü", prediction[10])
+        print("\nä",targets[10])
+        print("\nö",error_term[10])
+        error_term = np.sum(error_term, axis=1) # sum over units
+        print("\ne after", error_term.shape)
+        print("\nö after",error_term[10])
+        return np.sum(error_term, axis=0) # sum over examples 
+ 
 
-
-    def error_function_derived(self, prediction, targets):
+    def error_function_derived(self, prediction, targets, m=2):
         """Derived error function:  
             derived error function: (prediction - targets)
         
@@ -213,11 +225,12 @@ class Trainer():
         Returns:
             error_term (float): output of derived error function
         """
-        error_term = prediction - targets
-        return error_term
+        error_term = m**(prediction - targets)
+        error_term = np.sum(error_term, axis=1) # sum over units
+        return np.sum(error_term, axis=0) # sum over examples 
 
 
-    def visualize_training(self, df_name="mnist", type_model="SGD"):
+    def visualize_training(self, df_name, type_model="SGD"):
         """ Visualize accuracy and loss for training and test data.
         Args:
             type_model (str): type of model that has been trained
@@ -240,7 +253,7 @@ class Trainer():
        
         # get save path 
         file_name = 'Performance'  + '.png'
-        save_path = os.path.dirname(__file__) +  f'/../reports/figures'
+        save_path = os.path.dirname(__file__) +  f'/../reports/{df_name}/figures'
         completeName = os.path.join(save_path, file_name)
         plt.savefig(completeName)
         plt.clf()

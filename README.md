@@ -13,7 +13,7 @@ paper on mnist biological network for  2,000 hidden units:
 ## ToDos:
 
 - save data in other format -> pickle, parquet, ...? 
-- 
+- add a tuner 
 
 
 

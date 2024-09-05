@@ -1,7 +1,7 @@
 import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
-from visu import draw_weights
+from visu import draw_weights, draw_encoding
 
 
 def training(inputs, n_hidden): 
@@ -12,7 +12,7 @@ def training(inputs, n_hidden):
     eps0=2e-2    # learning rate
     mu=0.0       # the mean of the gaussian distribution that initializes the weights
     sigma=1.0    # the standard deviation of that gaussian
-    n_epochs=100      # number of epochs
+    n_epochs=1000      # number of epochs
     size_batch=100      # size of the minibatch
     prec=1e-30   # parameter that controls numerical precision of the weight updates
     delta=0.4    # Strength of the anti-hebbian learning
@@ -39,6 +39,8 @@ def training(inputs, n_hidden):
             input_currents=np.dot(sig*np.absolute(weights)**(p-1),minibatch) 
            # input_currents = np.dot(weights**(p-1), minibatch) # convert raw input into set of input currents Iμ [eq. 8]
                                                                # has shape (100, 100)
+
+           # draw_encoding(input_currents, 10, 10, fig, 'mnist')
             
             ranking = np.argsort(input_currents, axis=0) # use currents as a proxy for ranking of the final activities
             # [eq. 10]

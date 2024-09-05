@@ -13,7 +13,7 @@ class Trainer():
     ___________________________________________________________
     """
 
-    def __init__(self, optimizer_func="Adam", learning_rate=None, n_epochs=None):
+    def __init__(self, n_inputs, n_outputs, optimizer_func="Adam", learning_rate=None, n_epochs=None):
         """Initializes Trainer()-Object
         
         Args:
@@ -30,12 +30,12 @@ class Trainer():
         """
 
         # hyperparamers
-        self.n_epochs = 10
-        self.learning_rate = 1.0
+        self.n_epochs = 50
+        self.learning_rate =  0.001
         self.batch_size = 100
         mu=0.0       # the mean of the gaussian distribution that initializes the weights
         sigma=1.0    # the standard deviation of that gaussian
-        self.weights  = np.random.normal(mu, sigma, (100,10)) # init weights 
+        self.weights  = np.random.normal(mu, sigma, (n_inputs, n_outputs)) # init weights 
         #self.optimizer_func = optimizer_func(learning_rate)
 
         # get params
@@ -86,25 +86,34 @@ class Trainer():
             x_train, x_test = x_train[shuffled_indices_tr,:], x_test[shuffled_indices_te,:]
             y_train, y_test = y_train[shuffled_indices_tr,:], y_test[shuffled_indices_te,:]
 
+
             # iterate over all minibatches <- MAKE PRETTIER
-            for i in range(imgs.shape[1]//self.batch_size):
-                x_train_batch = x_train[i*self.batch_size:(i+1)*self.batch_size,:] # pick minibatch, has shape (batch_size, n_hidden)
-                x_test_batch = x_test[i*self.batch_size:(i+1)*self.batch_size,:] 
-                y_train_batch = y_train[i*self.batch_size:(i+1)*self.batch_size,:] 
-                y_test_batch = y_test[i*self.batch_size:(i+1)*self.batch_size,:] 
+           # for i in range(y_train.shape[0]//self.batch_size):
+
+           # iterate over all examples 
+          #  for i in range(y_train.shape[0]):
+
+           # pick one minibatch per epoch
+            x_train_batch = x_train#[0:self.batch_size,:] # pick minibatch, has shape (batch_size, n_hidden)
+            x_test_batch = x_test#[0:self.batch_size,:] 
+            y_train_batch = y_train#[0:self.batch_size,:] 
+            y_test_batch = y_test#[0:self.batch_size,:] 
+          #  y_test_batch = y_test[i*self.batch_size:(i+1)*self.batch_size,:] 
+
+            print("xdx", y_test_batch)
 
 
-                # run model on test_ds to keep track of progress during training
-                self.test(x_test_batch, y_test_batch)
+            # run model on test_ds to keep track of progress during training
+            self.test(x_test_batch, y_test_batch)
 
-                # train 
-                self.train_step(x_train_batch, y_train_batch)
+            # train 
+            self.train_step(x_train_batch, y_train_batch)
 
-                print(f'Epoch: {str(epoch)} with \n \
-                test accuracy {self.test_accuracies[-1]} \n \
-                train accuracy {self.train_accuracies[-1]} \n \
-                test loss {self.test_losses[-1]} \n \
-                train loss {self.train_losses[-1]}')
+            print(f'Epoch: {str(epoch+1)} with \n \
+            test accuracy {self.test_accuracies[-1]} \n \
+            train accuracy {self.train_accuracies[-1]} \n \
+            test loss {self.test_losses[-1]} \n \
+            train loss {self.train_losses[-1]}')
                 
 
         print("Training Loop completed")
@@ -124,11 +133,16 @@ class Trainer():
         accuracy_aggregator = []
         loss_aggregator = []
         
-       # for img, target in (zip(tqdm(x_batch, desc='testing'), y_batch)):
+        # for img, target in (zip(tqdm(x_batch, desc='testing'), y_batch)):
+        print("Xsha",x_batch)
+        print("Xsha",x_batch.shape)
+       # print("Xsha",x_batch[10])
+      #  print("self.weights", self.weights[10])
         z = self.z(x_batch, self.weights)
-        prediction = self.act_func(z)
+       # print("z", z[10])
+        prediction = self.tanh(z)
         loss = self.error_function(prediction, y_batch)
-        accuracy =  y_batch == np.round(prediction, 0)
+        accuracy =  self.accuracy_func(prediction, y_batch)
 
         # return averages per batch
         #test_loss = np.mean(loss)
@@ -153,7 +167,7 @@ class Trainer():
 
         # forward pass 
         z = self.z(x_train, self.weights)
-        prediction = self.act_func(z)
+        prediction = self.tanh(z)
         # print("pred", prediction)
         # get loss
         #print("tar", target)
@@ -164,8 +178,12 @@ class Trainer():
         accuracy_aggregator.append(accuracy)
 
         # get gradients
-        gradients = self.error_function_derived(prediction, y_train) * self.act_func_derived(z)
-        gradients = np.dot(gradients.T, x_train).T
+        h = self.error_function_derived(prediction, y_train)
+        print("sh", h)
+        gradients = self.error_function_derived(prediction, y_train) * self.tanh_der(z) #100,10
+        print("\ngr", gradients.shape)
+        gradients = np.dot(x_train.T,gradients ) # ? 
+        print("\ngr", gradients.shape)
 
         # adapt the trainable variables with gradients 
         self.weights -= self.learning_rate * gradients
@@ -178,15 +196,38 @@ class Trainer():
         #return loss, acc_mean
 
     def z(self, x, weights):
-        return np.dot(x.T,weights)
+        return np.dot(x,weights)
     
-    def act_func(self,z):
+    def tanh(self,z):
+        return np.tanh(z)
+       # return (np.exp(z)  - np.exp(-z) )/(np.exp(z)  + np.exp(-z) )
+    
+    def cosh(self,z):
+        return(np.exp(z)  + np.exp(-z) )/2
+        
+    def tanh_der(self,z):
+        return 1 - np.tanh(z)**2
+       # return 1/np.cosh(z)**2
+      #  return 1/self.cosh(z)**2
+
+    
+    def sigmoid(self,z):
         return  1/(1+np.exp(-z))
     
-    def act_func_derived(self,z):
-        f = self.act_func(z)
+    def sigmoid_derived(self,z):
+        f = self.sigmoid(z)
         df = f * (1 - f)
         return df
+
+
+    def cross_entropy_loss_prime(self, p,t):
+    # https://shivammehta25.github.io/posts/deriving-categorical-cross-entropy-and-softmax/
+        return  np.sum(p- t, axis=1) / len(t)
+
+
+    def cross_entropy_loss(self, p, t):
+        return - np.sum(t * np.log(p), axis=1) / len(t)
+ 
 
     def error_function(self, prediction, targets, m=2):
         """Derived error function:  
@@ -200,20 +241,29 @@ class Trainer():
         """
 
         error_term = (prediction - targets)**m
-        print("\nprediction", prediction)
+       # print("\nprediction", prediction)
         
         print("\nt", targets.shape)
         print("\ne", error_term.shape)
+        print("\n\n\n HERE HERE HERE")
+     #   print("\n\nü", prediction[10])
+     #   print("\nä",targets[10])
+     #   print("\nö",error_term[10])
         
         
-        print("\n\nü", prediction[10])
-        print("\nä",targets[10])
-        print("\nö",error_term[10])
-        error_term = np.sum(error_term, axis=1) # sum over units
-        print("\ne after", error_term.shape)
-        print("\nö after",error_term[10])
-        return np.sum(error_term, axis=0) # sum over examples 
- 
+        # print("\n\nü", prediction[10])
+        # print("\nä",targets[10])
+        # print("\nö",error_term[10])
+        # error_term = np.sum(error_term, axis=1) * 1/10# sum over units
+        # print("\ne after", error_term.shape)
+        # print("\nö after",error_term[10])
+        # print("boing", targets.shape[0])
+        # error_term = np.sum(error_term, axis=1) # sum over units
+        # return np.sum(error_term, axis=0)  # sum over examples and avg over examples
+    
+        error_term = np.mean(error_term,axis=1)
+        return np.mean(error_term, axis=0)
+
 
     def error_function_derived(self, prediction, targets, m=2):
         """Derived error function:  
@@ -225,10 +275,31 @@ class Trainer():
         Returns:
             error_term (float): output of derived error function
         """
-        error_term = m**(prediction - targets)
-        error_term = np.sum(error_term, axis=1) # sum over units
-        return np.sum(error_term, axis=0) # sum over examples 
+        print("\nü", prediction[10])
+        print("\nä",targets[10])
+        print("huh", (prediction - targets)[10])
+        error_term = m*(prediction - targets)**(m-1)
+        print("hah", error_term[10])
+       # return np.mean(error_term, axis=1)
+       # return error_term
+      #  error_term = np.mean(error_term,axis=1)
+      #  return np.mean(error_term, axis=0)
+       # return error_term
+        error_term = np.sum(error_term, axis=1)# * 1/10 # sum over units
+        print("hahah", error_term[10])
+        e = np.sum(error_term, axis=0)
+        print("hahahah", e)
+        return e #* 1/targets.shape[0] # sum over examples 
 
+    def accuracy_func(self, prediction, targets):
+        acc = (np.round(prediction, 0) == targets)
+        # print("\n\n\n HERE HERE HERE")
+        # print("\n\nü", prediction[10])
+        # print("\nä",targets[10])
+       #print("\nö",acc[10])
+        acc = np.sum(acc, axis=1)
+       # print("\nö after",acc[10])
+        return acc
 
     def visualize_training(self, df_name, type_model="SGD"):
         """ Visualize accuracy and loss for training and test data.
@@ -284,5 +355,6 @@ class Trainer():
 # print(labels_onehot)
 
 
-# tr = Trainer()
+# tr = Trainer(n_inputs=4, n_outputs=3)
 # tr.training_loop(imgs=data, labels=labels_onehot)
+# tr.visualize_training(df_name='mnist')

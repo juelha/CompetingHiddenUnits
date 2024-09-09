@@ -1,4 +1,3 @@
-import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -8,7 +7,7 @@ from IPython.display import display, clear_output
 Collection of functions to visualize matrices
 """
 
-def draw_weights(weights, n_cols, n_rows, df_name, fig=None, epoch=0, n_hidden=0, show=False, save=False):
+def draw_weights(weights, n_cols, n_rows, df_name, epoch=0, n_hidden=0, show=False, save=False):
     """function to display weight matrix,
     rewritten from https://github.com/DimaKrotov/Biological_Learning/tree/master (c) 2018 Dmitry Krotov -- Apache 2.0 License 
 
@@ -21,8 +20,8 @@ def draw_weights(weights, n_cols, n_rows, df_name, fig=None, epoch=0, n_hidden=0
         save (bool, optional): _description_. Defaults to False.
         df_name (str, optional): _description_. Defaults to None.
     """
-    if fig is None:
-        fig=plt.figure(figsize=(12.9,10))
+    #if fig is None:
+    fig=plt.figure(figsize=(12.9,10))
     yy=0
     
     if df_name =="xor": # harcoded for now
@@ -36,7 +35,6 @@ def draw_weights(weights, n_cols, n_rows, df_name, fig=None, epoch=0, n_hidden=0
         for x in range(n_cols):
             HM[y*pxl_y:(y+1)*pxl_y, x*pxl_x:(x+1)*pxl_x]=weights[yy,:].reshape(pxl_y,pxl_x)
             yy += 1
-    plt.clf()
     nc=np.amax(np.absolute(HM))
     im=plt.imshow(HM,cmap='bwr',vmin=-nc,vmax=nc)
     fig.colorbar(im,ticks=[np.amin(HM), 0, np.amax(HM)])
@@ -106,7 +104,7 @@ def monitoring(weights, inputs, encoding, df_name, show=False, save=False):
     l.set_xticks([])
     l.set_yticks([])
     l.set_ylabel('10 Inputs')
-    num = draw_weights(inputs, n_cols=1, n_rows=10, fig=plt.figure(figsize=(12.9,10)), df_name=df_name)
+    num = draw_weights(inputs, n_cols=1, n_rows=10, df_name=df_name)
     max_ref = np.amax(np.absolute(num))
     im = l.imshow(num, cmap='bwr',vmin=-max_ref,vmax=max_ref)
     

@@ -30,12 +30,11 @@ def biolearning(inputs, n_hidden, n_epochs, df_name, show=False):
     p=2.0        # Lebesgue norm of the weights
     k=2          # ranking parameter, must be integer that is bigger or equal than 2
 
-    fig=plt.figure(figsize=(12.9,10))
-
     weights = np.random.normal(mu, sigma, (n_hidden, n_pixel)) # init weights 
 
     # training loop
-    for epoch in tqdm(range(n_epochs), desc="bio-learning"):
+    #for epoch in tqdm(range(n_epochs), desc="bio-learning"):
+    for epoch in range(n_epochs):
         eps = eps0 * (1-epoch/n_epochs) # annealing the learning rate 
         inputs = inputs[np.random.permutation(n_samples),:] # shuffle
 
@@ -74,7 +73,7 @@ def biolearning(inputs, n_hidden, n_epochs, df_name, show=False):
             # adapt weights
             weights += eps*np.true_divide(delta_w, max_delta_w) 
 
-        draw_weights(weights, 10, 10, df_name, fig, epoch+1, n_hidden, show)
+        draw_weights(weights, 10, 10, df_name, epoch+1, n_hidden, show)
       
 
     return weights

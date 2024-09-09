@@ -1,14 +1,7 @@
-# basics 
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from sklearn import datasets
 from IPython.display import display, clear_output
-
-from sklearn.linear_model import SGDClassifier
-from sklearn.model_selection import LearningCurveDisplay, ShuffleSplit
-from sklearn.tree import DecisionTreeClassifier
-
 from tqdm import tqdm 
 import pandas as pd
 

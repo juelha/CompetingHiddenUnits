@@ -1,27 +1,49 @@
 # CompetingHiddenUnits
 Implementation of "Unsupervised learning by competing hidden units" by Krotov and Hopfield (2019)
 
+Parts are rewritten from https://github.com/DimaKrotov/Biological_Learning/tree/master (c) 2018 Dmitry Krotov -- Apache 2.0 License 
 
 
-## Performance:
+## Run this project
 
-paper on mnist biological network for  2,000 hidden units: 
-    - training error = 0.40% 
-    - test error = 1.46% 
+### Option 1: Run Online 
+- Open [Google Colab](https://colab.research.google.com/notebook) and paste in this link: in the github option
+- running the first line of the demo notebook will clone the repo into your google colab files
+
+### Option 2: Run Locally 
+- install the conda environment with 
+- Clone the Repository or Download the ZIP File and extract.
+- Open the demo.ipynb either by navigating with the terminal or by using your preferred IDE 
+
+## Performance and Notes
+
+
+### Current Performance on mnist
+<img align="center" width="500" src="" hspace="10">
+
+This shows the error curve training with SGD as the supervised classifier. 
+The unsupervised "bio-weight" matrix was learned with 100 hidden units for 200 epochs. 
+The dimensions of the weights of the supervised layer were 100x10 for the ten classes. 
+
+
+### Possible reasons for lacking performance
+Krotov uses an Adam Optimizer and a decreasing learning rate which is not implemented yet. Additionally, I am experimenting with the way of passing the inputs through the unsupervised layer to the classifier.  
+
+Increasing the number of hidden units and epochs sadly does not help and seems to worsen the performance:
+<img align="center" width="500" src="" hspace="10">
 
 
 ## ToDos:
-
-- save data in other format -> pickle, parquet, ...? 
-- add a tuner 
-
-
-
-## Sources:
-mnist.csv from https://drive.google.com/file/d/1eEKzfmEu6WKdRlohBQiqi3PhW_uIVJVP/view 
-Refer to [MNIST in CSV](https://pjreddie.com/projects/mnist-in-csv/)
+- implement Adam and decreasing learning rate 
+- test other supervised classification algorithms than SGD 
+- set up experiments for tuning hyperparameters (currently there are taken from the mentioned repo by Krotov)
+- implement the slow version of the algorithm ? 
+- implement in PyTorch 
 
 
-fashion-mnist_test.csv -> https://www.kaggle.com/datasets/zalando-research/fashionmnist?resource=download
 
-FOR UBYTES-> https://yann.lecun.com/exdb/mnist/ and https://github.com/zalandoresearch/fashion-mnist respectively 
+## Data Sources:
+
+- mnist in csv format taken from https://pjreddie.com/projects/mnist-in-csv/
+- fashion-mnist in csv taken from https://www.kaggle.com/datasets/zalando-research/fashionmnist?resource=download
+

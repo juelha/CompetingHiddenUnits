@@ -65,32 +65,27 @@ class Trainer():
             _type_: _description_
         """
         
-
         x_train, x_test = np.split(imgs,[int(0.8 * len(imgs))])
         y_train, y_test = np.split(labels,[int(0.8 * len(labels))])
         
-        for epoch in range(self.n_epochs):
+        for epoch in tqdm(range(self.n_epochs), desc="SGD-learning"):
 
-            print(x_train)
             # do the shuffle 
             shuffled_indices_tr = np.random.permutation(x_train.shape[0]) # return a permutation of the indices
-            shuffled_indices_te = np.random.permutation(x_test.shape[0]) # return a permutation of the indices
+            shuffled_indices_te = np.random.permutation(x_test.shape[0]) 
             x_train, x_test = x_train[shuffled_indices_tr,:], x_test[shuffled_indices_te,:]
             y_train, y_test = y_train[shuffled_indices_tr,:], y_test[shuffled_indices_te,:]
 
 
-            # iterate over all minibatches <- MAKE PRETTIER
+            # iterate over all minibatches 
            # for i in range(y_train.shape[0]//self.batch_size):
 
-           # iterate over all examples 
-          #  for i in range(y_train.shape[0]):
-
-           # pick one minibatch per epoch
+            # pick one minibatch per epoch
             x_train_batch = x_train[0:self.batch_size,:] # pick minibatch, has shape (batch_size, n_hidden)
             x_test_batch = x_test[0:self.batch_size,:] 
             y_train_batch = y_train[0:self.batch_size,:] 
             y_test_batch = y_test[0:self.batch_size,:] 
-          #  y_test_batch = y_test[i*self.batch_size:(i+1)*self.batch_size,:] 
+
 
             # run model on test_ds to keep track of progress during training
             self.test(x_test_batch, y_test_batch)
@@ -98,14 +93,14 @@ class Trainer():
             # train 
             self.train_step(x_train_batch, y_train_batch)
 
-            print(f'Epoch: {str(epoch+1)} with \n \
-            test accuracy {self.test_accuracies[-1]} \n \
-            train accuracy {self.train_accuracies[-1]} \n \
-            test loss {self.test_losses[-1]} \n \
-            train loss {self.train_losses[-1]}')
+            # print(f'Epoch: {str(epoch+1)} with \n \
+            # test accuracy {self.test_accuracies[-1]} \n \
+            # train accuracy {self.train_accuracies[-1]} \n \
+            # test loss {self.test_losses[-1]} \n \
+            # train loss {self.train_losses[-1]}')
                 
 
-        print("Training Loop completed")
+        print(f"Training Loop completed with a test error of {self.test_losses[-1]}")
         return 0
 
 
@@ -178,12 +173,7 @@ class Trainer():
 
 
     def error_function_derived(self, prediction, targets, m=2):
-
-        print("\nü", prediction[10])
-        print("ä",targets[10])
-        print("huh", (prediction - targets)[10])
-        error_term = prediction - targets
-        return error_term
+        return prediction - targets
       
 
     def accuracy_func(self, prediction, targets):
@@ -197,10 +187,8 @@ class Trainer():
         pred_idx = np.argmax(prediction, axis=1) 
         tar_idx = np.argmax(targets, axis=1) 
         acc = np.where(pred_idx == tar_idx, 100, 0)
-        print("\n\npred", prediction)
-        print("\n\npred_idx", pred_idx)
-        print("tar_idx", tar_idx)
-        print("acc", acc)
+       # print("\n\npred_idx", pred_idx)
+       # print("tar_idx", tar_idx)
         return acc
     
     def visualize_error(self, df_name, type_model="SGD", show=False):

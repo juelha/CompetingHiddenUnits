@@ -4,13 +4,11 @@ import matplotlib.pyplot as plt
 import os
 from BioLearning import biolearning
 import Trainer
-from visu import draw_encoding, draw_weights, frankensteining
+from visu import draw_encoding, draw_weights, monitoring
 from Manager import load_data,save_weights, load_weights, save_encoding
 
 def main():
-
-
-    df_name = "fashion_mnist"
+    df_name = "mnist"
     inputs, labels = load_data(df_name)
     
     # train unsupervised layer
@@ -25,15 +23,15 @@ def main():
 
     # "encoding" all the inputs by running them through unsupervised layer
     encoding = np.dot(weights, inputs.T)
-   # encoding = np.where(encoding<0, 0, encoding) # RELU <- performance on xor better without relu and seems to be more stable (line go down all the time whereas with relu, line only go down some of the time)
-    encoding /= np.max(np.absolute(encoding))
+    #encoding = np.where(encoding<0, 0, encoding) # RELU <- performance seems better without 
+    encoding /= np.max(np.absolute(encoding)) 
 
     encoding = encoding.T # make encoding have shape (n_samples, n_hidden)
     
     draw_encoding(encoding, 10, 10, df_name, save=True)
     save_encoding(encoding, df_name)
     
-    frankensteining(weights, inputs, encoding, df_name)
+    monitoring(weights, inputs, encoding, df_name)
 
 
     # train supervised trainer 

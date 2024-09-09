@@ -2,10 +2,12 @@ import numpy as np
 import os 
 import yaml 
 from yaml.loader import UnsafeLoader
+import pandas as pd
 
 """
 Collection of functions to save and load
 """
+
 
 def get_path(file_name, relative_path, notes=None):
     """gets full path for loading
@@ -18,7 +20,8 @@ def get_path(file_name, relative_path, notes=None):
     Returns:
         full_path (str): full path for loading directly
     """
-    save_path = os.path.dirname(__file__) +  relative_path
+    save_path = os.getcwd() + relative_path # https://stackoverflow.com/questions/39125532/file-does-not-exist-in-jupyter-notebook
+    #save_path = os.path.dirname(__file__) +  relative_path
     if not notes == None:
         file_name += "_" + notes
     full_path = os.path.join(save_path, file_name)
@@ -36,10 +39,12 @@ def load_data(df_name):
                                                         labels_onehot (n_samples, n_classes)
     """
     # load data
-    file_name = f'{df_name}.csv'
-    relative_path =   '/../data'
+    file_name = f'{df_name}.pkl'
+    relative_path =   '/data'
     path = get_path(file_name, relative_path)
-    data = np.loadtxt(path , delimiter=",")
+    #data = np.loadtxt(path , delimiter=",")
+    data = pd.read_pickle(path) 
+    data = data.to_numpy()
 
     if df_name == "xor":
         labels = np.asfarray(data[:, -1:]) # labels are last column
@@ -59,26 +64,26 @@ def load_data(df_name):
 
 
 def save_encoding(encoding, df_name, notes=None):
-    relative_path = f"/../config/{df_name}/"
+    relative_path = f"/config/{df_name}/"
     path = get_path("encoding", relative_path, notes)
     np.save(path, encoding)
     
 
 def save_weights(weights, df_name, notes=None):
-    relative_path = f"/../config/{df_name}/weights/"
+    relative_path = f"/config/{df_name}/weights/"
     path = get_path("config_weights", relative_path, notes)
     np.save(path, weights)
     
 
 def load_weights(df_name, notes=None):
-    relative_path = f"/../config/{df_name}/weights/"
+    relative_path = f"/config/{df_name}/weights/"
     path = get_path("config_weights", relative_path, notes)
     return np.load(path +'.npy')
 
 
 def load_hyperparams(df_name):
     # opt 1: yaml
-    relative_path = f"/../config/{df_name}/"
+    relative_path = f"/config/{df_name}/"
     save_path = os.path.dirname(__file__) +  relative_path
     file_name = f"hyperparams.yml"
     full_path = os.path.join(save_path, file_name)

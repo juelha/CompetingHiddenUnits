@@ -1,10 +1,10 @@
 import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
-from visu import draw_weights, draw_encoding
+#from visu import draw_weights, draw_encoding
+from src import *
 
-
-def biolearning(inputs, n_hidden, n_epochs): 
+def biolearning(inputs, n_hidden, n_epochs, df_name, show=False): 
     """Fast Implementation of biological learning algorithm
 
     Args:
@@ -90,7 +90,7 @@ def biolearning(inputs, n_hidden, n_epochs):
 
             weights += eps*np.true_divide(delta_w,max_delta_w) # normalize 
 
-        draw_weights(weights, 10, 10, fig, epoch+1)
+        draw_weights(weights, 10, 10, df_name, fig, epoch+1, n_hidden, show)
       
 
     return weights

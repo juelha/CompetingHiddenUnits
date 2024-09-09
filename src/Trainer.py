@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from sklearn import datasets
+from IPython.display import display, clear_output
 
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import LearningCurveDisplay, ShuffleSplit
@@ -195,36 +196,59 @@ class Trainer():
         
         pred_idx = np.argmax(prediction, axis=1) 
         tar_idx = np.argmax(targets, axis=1) 
-        acc = np.where(pred_idx == tar_idx, 1, 0)
+        acc = np.where(pred_idx == tar_idx, 100, 0)
         print("\n\npred", prediction)
         print("\n\npred_idx", pred_idx)
         print("tar_idx", tar_idx)
         print("acc", acc)
         return acc
+    
+    def visualize_error(self, df_name, type_model="SGD", show=False):
+        """_summary_
 
-    def visualize_training(self, df_name, type_model="SGD"):
+        Args:
+            df_name (_type_): _description_
+            type_model (_type_, optional): _description_. Defaults to "SGD".
+        """
+        fig = plt.figure()
+        line1, = plt.plot(self.test_losses)
+        line2, = plt.plot(self.train_losses)
+        plt.xlabel("Epochs")
+        plt.ylabel("Error in %")
+        plt.legend((line1, line2),
+        ("test losses", "training losses"))
+        plt.title(f'Error training with {type_model}')
+
+        if show:
+            fig.canvas.draw()   
+            display(fig) 
+        # get save path 
+        file_name = 'ErrorCurve'  + '.png'
+        save_path = os.path.dirname(__file__) +  f'/../reports/{df_name}/figures'
+        completeName = os.path.join(save_path, file_name)
+        plt.savefig(completeName)
+        plt.clf()
+
+
+    def visualize_accuracy(self, df_name, type_model="SGD", show=False):
         """ Visualize accuracy and loss for training and test data.
         Args:
             type_model (str): type of model that has been trained
         """
-        plt.figure()
+        fig = plt.figure()
         # accuracies
         line1, = plt.plot(self.test_accuracies)
         line2, = plt.plot(self.train_accuracies)
-       # line3, = plt.plot(self.val_accuracies)
-        # losses
-        line4, = plt.plot(self.test_losses)
-        line5, = plt.plot(self.train_losses)
-       # line5, = plt.plot(self.v_losses)
         plt.xlabel("Epochs")
-        plt.ylabel("Loss/Accuracy")
-        plt.legend((line1, line2, line4, line5),
-        ("test accuracy", "training accuracy", "test losses", "training losses"))
-        plt.title(f'{type_model}')
-        plt.figure
-       
+        plt.ylabel("Accuracy in %")
+        plt.legend((line1, line2),
+        ("test accuracy", "training accuracy"))
+        plt.title(f'Accuracy training with {type_model}')
+        if show:
+            fig.canvas.draw()   
+            display(fig) 
         # get save path 
-        file_name = 'Performance'  + '.png'
+        file_name = 'AccuracyCurve'  + '.png'
         save_path = os.path.dirname(__file__) +  f'/../reports/{df_name}/figures'
         completeName = os.path.join(save_path, file_name)
         plt.savefig(completeName)

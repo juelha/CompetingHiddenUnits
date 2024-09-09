@@ -1,31 +1,83 @@
-# basics
 import numpy as np
-import matplotlib.pyplot as plt
 import os 
-import numpy as np
 import yaml 
 from yaml.loader import UnsafeLoader
-import os
 
 """
-Collection of 
-- functions that save and load weights for the neuro fuzzy layers
-
+Collection of functions to save and load
 """
 
-def load_hyperparams(df_name, best=False):
-    """load weights from yaml file
-    
+def get_path(file_name, relative_path, notes=None):
+    """gets full path for loading
+
     Args:
-        layer (callable): layer the param is the attribute to
-        param_name (str): name of parameter to load either: "centers", "widths", "weights
-        dataset_name (str): name of datasets weights have been built on
+        file_name (str): name of file
+        relative_path (str): path taken from file to source of data
+        notes (str, optional): Defaults to None.
 
-    Raises:
-        AssertionError: if save_path not found
+    Returns:
+        full_path (str): full path for loading directly
     """
+    save_path = os.path.dirname(__file__) +  relative_path
+    if not notes == None:
+        file_name += "_" + notes
+    full_path = os.path.join(save_path, file_name)
+    return full_path
+
+
+def load_data(df_name):
+    """loads given dataset and splits into inputs and one-hot encoded labels
+
+    Args:
+        df_name (str): name of dataset
+
+    Returns:
+        inputs, labels_onehot (np.ndarray, np.ndarray): inptus of shape (n_samples, n_features), 
+                                                        labels_onehot (n_samples, n_classes)
+    """
+    # load data
+    file_name = f'{df_name}.csv'
+    relative_path =   '/../data'
+    path = get_path(file_name, relative_path)
+    data = np.loadtxt(path , delimiter=",")
+
+    if df_name == "xor":
+        labels = np.asfarray(data[:, -1:]) # labels are last column
+        inputs =  np.asfarray(data[:, :-1])
+    
+    if df_name =="mnist" or df_name =="fashion_mnist":
+        inputs = np.asfarray(data[:, 1:]) # labels are first column
+        inputs = inputs/255.0 # normalize 
+        labels = np.asfarray(data[:, :1])
+
+    # transform labels into one hot representation
+    n_labels = len(np.unique(labels)) 
+    label_list = np.arange(n_labels)
+    labels_onehot = (label_list==labels).astype(np.float64)
+    
+    return inputs, labels_onehot
+
+
+def save_encoding(encoding, df_name, notes=None):
+    relative_path = f"/../config/{df_name}/"
+    path = get_path("encoding", relative_path, notes)
+    np.save(path, encoding)
+    
+
+def save_weights(weights, df_name, notes=None):
+    relative_path = f"/../config/{df_name}/weights/"
+    path = get_path("config_weights", relative_path, notes)
+    np.save(path, weights)
+    
+
+def load_weights(df_name, notes=None):
+    relative_path = f"/../config/{df_name}/weights/"
+    path = get_path("config_weights", relative_path, notes)
+    return np.load(path +'.npy')
+
+
+def load_hyperparams(df_name):
     # opt 1: yaml
-   
     relative_path = f"/../config/{df_name}/"
     save_path = os.path.dirname(__file__) +  relative_path
     file_name = f"hyperparams.yml"
@@ -35,84 +87,3 @@ def load_hyperparams(df_name, best=False):
         # Converts yaml document to np array object
         params = yaml.load(config_file, Loader=UnsafeLoader)
         return params
-
-    # # opt 2: np.save
-    # file_name = "config_weights"
-    # other_name = os.path.join(save_path, file_name)
-    # loaded_weights = np.load(other_name+'.npy')
-    #print("self.centers")
-    #print(self.centers)
-            # save params for training 
-
-
-def save_weights(weights, layer_name, df_name, notes=None):
-    """saves weights to yaml file
-    
-    Args:
-        layer (callable): layer the param is the attribute to
-        param_name (str): name of parameter to load either: "centers", "widths", "weights
-        dataset_name (str): name of datasets weights have been built on
-
-    Raises:
-        AssertionError: if save_path not found
-    """
-    # save path 
-    relative_path = f"/../config/{df_name}/weights/"
-    save_path = os.path.dirname(__file__) + relative_path
-    assert  os.path.exists(save_path), f'save_path {save_path} not found'
-
-    # opt 1: yaml
-    # file_name = f"config_{layer_name}.yaml"
-    # full_path = os.path.join(save_path, file_name)
-    # with open(full_path, 'w') as yaml_file:
-    #     #params = getattr(layer, param_name)
-    #     yaml.dump(weights.tolist(), yaml_file)
-
-    # opt 2: np.save
-    file_name = "config_weights"
-    if not notes == None:
-        file_name += "_" + notes
-    other_name = os.path.join(save_path, file_name)
-    np.save(other_name, weights)
-    
-
-def load_weights(layer_name, df_name, notes=None):
-    """load weights from yaml file
-    
-    Args:
-        layer (callable): layer the param is the attribute to
-        param_name (str): name of parameter to load either: "centers", "widths", "weights
-        dataset_name (str): name of datasets weights have been built on
-
-    Raises:
-        AssertionError: if save_path not found
-    """
-    # opt 1: yaml
-    # if best:
-    #     file_name = f"config_{layer_name}_best.yaml"
-    # else:
-    #     file_name = f"config_{layer_name}.yaml"
-    # relative_path = f"/../config/{df_name}/weights/"
-    # save_path = os.path.dirname(__file__) +  relative_path
-    # full_path = os.path.join(save_path, file_name)
-    # assert os.path.exists(full_path), f'File {file_name} not found'
-    # with open(full_path, 'r') as config_file:
-    #     # Converts yaml document to np array object
-    #     params = yaml.load(config_file, Loader=UnsafeLoader)
-    #     #setattr(layer, param_name, np.array(params))
-    #     return params
-  
-
-    # # opt 2: np.save
-    relative_path = f"/../config/{df_name}/weights/"
-    save_path = os.path.dirname(__file__) +  relative_path
-    file_name = "config_weights"
-    if not notes == None:
-        file_name += "_" + notes
-    other_name = os.path.join(save_path, file_name)
-    loaded_weights = np.load(other_name +'.npy')
-  #  print("self.centers")
-   # print(self.centers)
-          #  save params for training 
-
-    return loaded_weights
